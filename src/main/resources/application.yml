@@ -7,12 +7,12 @@ spring:
       port: 6379
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://localhost:5432/notice_hub
     username: postgres
-    password: qwer1234!
+    password: qwer1234
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     open-in-view: false
     properties:
       hibernate:
