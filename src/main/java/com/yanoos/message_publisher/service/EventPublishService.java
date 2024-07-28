@@ -18,10 +18,13 @@ public class EventPublishService {
     private long LOCK_TIME;
 
     @Transactional
-    public void publishEvents(){
+    public void publishEvents() throws InterruptedException {
         long startTime = System.currentTimeMillis();
         if(redisLockService.lock(LOCK_KEY, LOCK_TIME)){
             try{
+                //테스트용 시간경과
+                Thread.sleep(9 * 1000);
+
                 //미처리 이벤트 가져옴
                 //메시지브로커에게 퍼블리싱
                 //이벤트 처리상태 업데이트
