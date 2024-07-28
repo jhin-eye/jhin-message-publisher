@@ -15,8 +15,8 @@ public class EventController {
     @ResponseBody
     @GetMapping("/publish")
     public String publishEvents() throws InterruptedException {
-        log.info("controller called");
         eventPublishService.publishEvents();
+        log.info("controller success {}",Thread.currentThread().getId());
         return "success";
     }
 }
