@@ -1,6 +1,7 @@
 package com.yanoos.message_publisher.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class EventPublishService {
@@ -21,6 +23,7 @@ public class EventPublishService {
     public void publishEvents() throws InterruptedException {
         long startTime = System.currentTimeMillis();
         if(redisLockService.lock(LOCK_KEY, LOCK_TIME)){
+            log.info("{} get lock!", Thread.currentThread().getId());
             try{
                 //테스트용 시간경과
                 Thread.sleep(9 * 1000);
@@ -37,9 +40,11 @@ public class EventPublishService {
 
             }
             finally {
+                log.info("{} unlock!", Thread.currentThread().getId());
                 redisLockService.unlock(LOCK_KEY);
             }
         }else{
+            log.info("{} couldn't get lock!", Thread.currentThread().getId());
             throw new RuntimeException("Unable to acquire lock, event processing unlocked");
         }
     }
