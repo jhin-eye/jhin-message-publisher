@@ -1,6 +1,7 @@
 package com.yanoos.message_publisher.controller;
 
 import com.yanoos.message_publisher.service.EventPublishService;
+import com.yanoos.message_publisher.service.KafkaConsumer;
 import com.yanoos.message_publisher.service.entity_service.EventEntityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class EventController {
     private final EventPublishService eventPublishService;
     private final EventEntityService eventEntityService;
+    private final KafkaConsumer kafkaConsumer;
     @ResponseBody
     @GetMapping("/publish")
     public String publishEvents() throws InterruptedException {
@@ -24,7 +26,6 @@ public class EventController {
     @ResponseBody
     @GetMapping("/")
     public String test(){
-        eventEntityService.getEventByEventId(1);
         return "go";
     }
 }

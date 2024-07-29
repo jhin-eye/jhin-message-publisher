@@ -1,6 +1,8 @@
 package com.yanoos.message_publisher.entity.event;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.yanoos.message_publisher.entity.converter.JsonNodeConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,8 +21,9 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long eventId;
 
-    @Column(name = "event_data", nullable = false)
-    private String eventData;
+    @Column(name = "event_data", columnDefinition = "json", nullable = false)
+    @Convert(converter = JsonNodeConverter.class)
+    private JsonNode eventData;
 
     @Column(name = "finished", nullable = false)
     private Boolean finished;
@@ -29,7 +32,4 @@ public class Event {
     @Builder.Default
     List<MapEventEventType> mapEventEventTypes = new ArrayList<>();
 
-    public void done(){
-        this.finished = true;
-    }
 }

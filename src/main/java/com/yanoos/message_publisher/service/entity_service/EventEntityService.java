@@ -30,6 +30,6 @@ public class EventEntityService {
     }
 
     public List<Event> getEventsByFinished(Boolean finished) {
-        return eventRepository.findByFinished(finished);
+        return eventRepository.findByFinishedOrderByEventIdAsc(finished);
     }
 }

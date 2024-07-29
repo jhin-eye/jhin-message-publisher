@@ -3,11 +3,12 @@ package com.yanoos.message_publisher.entity.event;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "map_event_event_type")
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class MapEventEventType {
@@ -27,4 +28,5 @@ public class MapEventEventType {
 
     @Column(name = "published", nullable = false)
     private Boolean published;
+
 }
