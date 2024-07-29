@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "event_type")
 @Data
@@ -20,4 +23,8 @@ public class EventType {
 
     @Column(name = "event_type", nullable = false)
     private String eventType;
+
+    @OneToMany(mappedBy = "eventType", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Builder.Default
+    List<MapEventEventType> mapEventEventTypes = new ArrayList<>();
 }
