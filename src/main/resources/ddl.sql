@@ -18,7 +18,7 @@ CREATE TABLE post
 CREATE TABLE event
 (
     event_id   BIGSERIAL PRIMARY KEY, -- 고유 식별자
-    event_data JSON NOT NULL,         -- 이벤트 내용
+    event_data TEXT NOT NULL,         -- 이벤트 내용
     finished  BOOLEAN DEFAULT FALSE  -- 게시 여부 (기본값: FALSE)
 );
 
