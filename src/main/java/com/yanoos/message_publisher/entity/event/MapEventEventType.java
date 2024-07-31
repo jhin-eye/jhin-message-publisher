@@ -2,7 +2,6 @@ package com.yanoos.message_publisher.entity.event;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -28,5 +27,9 @@ public class MapEventEventType {
 
     @Column(name = "published", nullable = false)
     private Boolean published;
+
+    public void done(){
+        this.published = true;
+    }
 
 }

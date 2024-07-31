@@ -36,6 +36,7 @@ public class EventPublishService {
     @Value("${lock.timeout}")
     private long LOCK_TIME;
 
+
     @Transactional
     public void publishUnFinishedEvents() throws InterruptedException {
         long startTime = System.currentTimeMillis();
@@ -51,12 +52,14 @@ public class EventPublishService {
                 //메시지브로커에게 퍼블리싱
                 for(Event event : unFinishedEvents){
                     messagePublish(event);
+
+                    //경과시간 조사
+                    long elapsedTime = System.currentTimeMillis() - startTime;
+                    if(elapsedTime> LOCK_TIME * 1000){
+                        break;
+                    }
                 }
-                //경과시간 조사
-                long elapsedTime = System.currentTimeMillis() - startTime;
-                if(elapsedTime> LOCK_TIME * 1000){
-                    throw new RuntimeException("Event processing took too long and lock expired");
-                }
+
 
             }
             finally {
@@ -81,7 +84,8 @@ public class EventPublishService {
         }
 
         if(mapCount==0){
-            eventRepository.updateFinishedById(event.getEventId(),true);
+            event.done();
+//            eventRepository.updateFinishedById(event.getEventId(),true);
         }
     }
 
@@ -97,7 +101,7 @@ public class EventPublishService {
 
         boolean successSendMessage = kafkaProducer.sendMessage(mapEventEventType.getEventType().getEventType(), jsonMessage.toString());
         if(successSendMessage){
-            mapEventEventTypeRepository.updatePublishedById(mapEventEventType.getId(),true);
+            mapEventEventType.done();
             return true;
         }
 
