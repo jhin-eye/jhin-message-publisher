@@ -48,12 +48,11 @@ public class EventPublishService {
 
                 //미처리 이벤트 가져옴
                 List<Event> unFinishedEvents = eventEntityService.getEventsByFinished(false);
-                unFinishedEvents = unFinishedEvents.subList(0,10);
                 //메시지브로커에게 퍼블리싱
                 for(Event event : unFinishedEvents){
                     messagePublish(event);
 
-                    //경과시간 조사
+                    //경과시간 조사하여 LOCK_TIME(10초) 이상 물고있었으면 멈춤
                     long elapsedTime = System.currentTimeMillis() - startTime;
                     if(elapsedTime> LOCK_TIME * 1000){
                         break;
