@@ -4,14 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yanoos.message_publisher.entity.event.Event;
-import com.yanoos.message_publisher.repository.EventRepository;
-import com.yanoos.message_publisher.repository.MapEventEventTypeRepository;
 import com.yanoos.message_publisher.service.entity_service.EventEntityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -31,8 +28,6 @@ public class EventPublishService {
 
     private static final String LOCK_KEY = "event_publisher_lock";
     private final EventEntityService eventEntityService;
-    private final MapEventEventTypeRepository mapEventEventTypeRepository;
-    private final EventRepository eventRepository;
     @Value("${lock.timeout}")
     private long LOCK_TIME;
 
@@ -43,11 +38,9 @@ public class EventPublishService {
         if(redisLockService.lock(LOCK_KEY, LOCK_TIME)){
             log.info("{} get lock!", Thread.currentThread().getId());
             try{
-                //Thread.sleep(9 * 1000); //TODO 테스트 종료 후 제거
-
                 //미처리 이벤트 가져옴
                 List<Event> unFinishedEvents = eventEntityService.getEventsByPublished(false);
-                unFinishedEvents = unFinishedEvents.subList(0,10);//TODO 테스트 종료 후 제거
+                unFinishedEvents = unFinishedEvents.subList(0, Math.min(unFinishedEvents.size(), 10));//TODO 테스트 종료 후 제거
                 //메시지브로커에게 퍼블리싱
                 for(Event event : unFinishedEvents){
 
@@ -69,8 +62,6 @@ public class EventPublishService {
                         break;
                     }
                 }
-
-
             }
             finally {
                 log.info("{} unlock!", Thread.currentThread().getId());
