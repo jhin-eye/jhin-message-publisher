@@ -1,12 +1,8 @@
 package com.yanoos.message_publisher.entity.event;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "event")
@@ -23,14 +19,13 @@ public class Event {
     @Column(name = "event_data", columnDefinition = "json", nullable = false)
     private String eventData;
 
-    @Column(name = "finished", nullable = false)
-    private Boolean finished;
+    @Column(name = "published", nullable = false)
+    private Boolean published;
 
-    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @Builder.Default
-    List<MapEventEventType> mapEventEventTypes = new ArrayList<>();
+    @Column(name = "event_type", nullable = false)
+    private String eventType;
 
     public void done() {
-        this.finished=true;
+        this.published =true;
     }
 }

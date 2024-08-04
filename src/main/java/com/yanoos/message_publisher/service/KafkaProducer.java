@@ -8,6 +8,7 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @Slf4j
@@ -15,18 +16,16 @@ import java.util.concurrent.CompletableFuture;
 public class KafkaProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public boolean sendMessage(String topic, String message){
+    public boolean sendMessage(String topic, String message) throws ExecutionException, InterruptedException {
         //메시지 전송
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, message);
 
-        try {
-            SendResult<String, String> result = future.get();
-            RecordMetadata recordMetadata = result.getRecordMetadata();
-            log.info("Sent message=[{}] with offset=[{}], partition=[{}], topic=[{}]",
-                    message, recordMetadata.offset(), recordMetadata.partition(), recordMetadata.topic());
-            return true;
-        }catch (Exception e){
-            return false;
-        }
+
+        SendResult<String, String> result = future.get();
+        RecordMetadata recordMetadata = result.getRecordMetadata();
+        log.info("Sent message=[{}] with offset=[{}], partition=[{}], topic=[{}]",
+                message, recordMetadata.offset(), recordMetadata.partition(), recordMetadata.topic());
+        return true;
+
     }
 }

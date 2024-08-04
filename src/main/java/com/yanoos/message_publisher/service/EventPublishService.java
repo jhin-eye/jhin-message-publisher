@@ -1,13 +1,12 @@
 package com.yanoos.message_publisher.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yanoos.message_publisher.entity.event.Event;
-import com.yanoos.message_publisher.entity.event.MapEventEventType;
 import com.yanoos.message_publisher.repository.EventRepository;
 import com.yanoos.message_publisher.repository.MapEventEventTypeRepository;
 import com.yanoos.message_publisher.service.entity_service.EventEntityService;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,19 +38,30 @@ public class EventPublishService {
 
 
     @Transactional
-    public void publishUnFinishedEvents() throws InterruptedException {
+    public void publishUnFinishedEvents() throws InterruptedException, JsonProcessingException, ExecutionException {
         long startTime = System.currentTimeMillis();
         if(redisLockService.lock(LOCK_KEY, LOCK_TIME)){
             log.info("{} get lock!", Thread.currentThread().getId());
             try{
-                //테스트용 시간경과
-//                Thread.sleep(9 * 1000);
+                //Thread.sleep(9 * 1000); //TODO 테스트 종료 후 제거
 
                 //미처리 이벤트 가져옴
-                List<Event> unFinishedEvents = eventEntityService.getEventsByFinished(false);
+                List<Event> unFinishedEvents = eventEntityService.getEventsByPublished(false);
+                unFinishedEvents = unFinishedEvents.subList(0,10);//TODO 테스트 종료 후 제거
                 //메시지브로커에게 퍼블리싱
                 for(Event event : unFinishedEvents){
-                    messagePublish(event);
+
+                    JsonNode eventDataNode = objectMapper.readTree(event.getEventData());
+                    // JSON 변환
+                    Map<String, Object> jsonMap = new HashMap<>();
+                    jsonMap.put("eventId", event.getEventId());
+                    jsonMap.put("eventType", event.getEventType());
+                    jsonMap.put("value", eventDataNode);
+                    JsonNode jsonMessage = objectMapper.valueToTree(jsonMap);
+
+                    kafkaProducer.sendMessage(event.getEventType(), jsonMessage.toString());
+                    //이벤트 처리 완료
+                    event.done();
 
                     //경과시간 조사하여 LOCK_TIME(10초) 이상 물고있었으면 멈춤
                     long elapsedTime = System.currentTimeMillis() - startTime;
@@ -71,40 +82,4 @@ public class EventPublishService {
         }
     }
 
-    @Transactional
-    protected void messagePublish(Event event) {
-        List<MapEventEventType> mapEventEventTypes = event.getMapEventEventTypes();
-        int mapCount = mapEventEventTypes.size();//반환시 0이면 event에 해당하는 모든 메세지 퍼블된것 == 다시 볼 필요 없는 이벤트가 된다
-
-        for(MapEventEventType mapEventEventType: mapEventEventTypes){
-            if(publishOneMapEventEventType(event, mapEventEventType)){
-                mapCount --;
-            }
-        }
-
-        if(mapCount==0){
-            event.done();
-//            eventRepository.updateFinishedById(event.getEventId(),true);
-        }
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    protected boolean publishOneMapEventEventType(Event event, MapEventEventType mapEventEventType) {
-
-        // JSON 변환
-        Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("eventId", event.getEventId());  // '내가정한id'를 실제 ID로 변경 필요
-        jsonMap.put("eventTypeId", mapEventEventType.getEventType().getEventTypeId());  // '내가정한id'를 실제 ID로 변경 필요
-        jsonMap.put("val", event.getEventData());
-        JsonNode jsonMessage = objectMapper.valueToTree(jsonMap);
-
-        boolean successSendMessage = kafkaProducer.sendMessage(mapEventEventType.getEventType().getEventType(), jsonMessage.toString());
-        if(successSendMessage){
-            mapEventEventType.done();
-            return true;
-        }
-
-        return false;
-
-    }
 }

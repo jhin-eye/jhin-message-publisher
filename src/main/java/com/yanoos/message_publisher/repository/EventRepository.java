@@ -9,11 +9,5 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event,Long> {
-    List<Event> findByFinishedOrderByEventIdAsc(boolean b);
-
-    @Modifying
-    @Transactional
-    @Query("UPDATE Event e SET e.finished = :finished WHERE e.eventId = :eventId")
-    void updateFinishedById(Long eventId, Boolean finished);
-
+    List<Event> findByPublishedOrderByEventIdAsc(boolean b);
 }
