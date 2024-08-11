@@ -1,6 +1,6 @@
+server:
+  port: 8768
 spring:
-  profiles:
-    active: local
   application:
     name: message_publisher
   data:
