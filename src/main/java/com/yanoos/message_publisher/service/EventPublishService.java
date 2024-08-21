@@ -8,6 +8,7 @@ import com.yanoos.message_publisher.service.entity_service.EventEntityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,16 +32,17 @@ public class EventPublishService {
     @Value("${lock.timeout}")
     private long LOCK_TIME;
 
-
+    @Scheduled(cron = "${scheduled.cron}")
     @Transactional
     public void publishUnFinishedEvents() throws InterruptedException, JsonProcessingException, ExecutionException {
+        log.info("publishUnFinishedEvents");
         long startTime = System.currentTimeMillis();
         if(redisLockService.lock(LOCK_KEY, LOCK_TIME)){
             log.info("{} get lock!", Thread.currentThread().getId());
             try{
                 //미처리 이벤트 가져옴
                 List<Event> unFinishedEvents = eventEntityService.getEventsByPublished(false);
-                unFinishedEvents = unFinishedEvents.subList(0, Math.min(unFinishedEvents.size(), 10));//TODO 테스트 종료 후 제거
+                // unFinishedEvents = unFinishedEvents.subList(0, Math.min(unFinishedEvents.size(), 10));//TODO 테스트 종료 후 제거
                 //메시지브로커에게 퍼블리싱
                 for(Event event : unFinishedEvents){
 

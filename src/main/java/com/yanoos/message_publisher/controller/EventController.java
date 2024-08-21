@@ -2,10 +2,9 @@ package com.yanoos.message_publisher.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.yanoos.message_publisher.service.EventPublishService;
-import com.yanoos.message_publisher.service.KafkaConsumer;
-import com.yanoos.message_publisher.service.entity_service.EventEntityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -17,8 +16,8 @@ import java.util.concurrent.ExecutionException;
 @Controller
 public class EventController {
     private final EventPublishService eventPublishService;
-    private final EventEntityService eventEntityService;
-    private final KafkaConsumer kafkaConsumer;
+
+
     @ResponseBody
     @GetMapping("/publish")
     public String publishEvents() throws InterruptedException, ExecutionException, JsonProcessingException {
@@ -26,9 +25,11 @@ public class EventController {
         return "success";
     }
 
+
+    @GetMapping("/test")
     @ResponseBody
-    @GetMapping("/")
-    public String test(){
-        return "go";
+    public String test() {
+        log.info("test");
+        return "test";
     }
 }

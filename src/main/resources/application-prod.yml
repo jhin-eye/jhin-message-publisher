@@ -33,4 +33,9 @@ spring:
 lock:
   timeout: 10
 
+logging:
+  level:
+    org.springframework.core.env: DEBUG
 
+scheduled:
+  cron: "${CRON_EXPRESSION}"

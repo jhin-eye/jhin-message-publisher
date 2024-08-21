@@ -35,3 +35,5 @@ lock:
   timeout: 10
 
 
+scheduled:
+  cron: "0 * * * * *"  # 기본 cron 표현식
