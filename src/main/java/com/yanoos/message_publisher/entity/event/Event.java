@@ -4,6 +4,9 @@ package com.yanoos.message_publisher.entity.event;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "event")
 @Getter
@@ -15,6 +18,8 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long eventId;
+    @Column(name = "parent_event_id", nullable = true) // nullable을 true로 설정하여 parent가 없을 때도 처리 가능
+    private Long parentEventId;
 
     @Column(name = "event_data", columnDefinition = "json", nullable = false)
     private String eventData;
@@ -24,8 +29,19 @@ public class Event {
 
     @Column(name = "event_type", nullable = false)
     private String eventType;
+    @Column(name="created_at",nullable = false, updatable = false)
+    private Instant createdAt = Instant.now();
+    @Column(name="try_count", nullable = false)
+    private Long tryCount;
+    @Column(name="published_at", nullable = true)
+    private Instant publishedAt;
 
     public void done() {
         this.published =true;
+        this.publishedAt = Instant.now();
+    }
+
+    public void addTryCount(){
+        this.tryCount++;
     }
 }

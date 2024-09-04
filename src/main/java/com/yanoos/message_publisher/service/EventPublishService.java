@@ -39,12 +39,13 @@ public class EventPublishService {
         long startTime = System.currentTimeMillis();
         if(redisLockService.lock(LOCK_KEY, LOCK_TIME)){
             log.info("{} get lock!", Thread.currentThread().getId());
-            try{
-                //미처리 이벤트 가져옴
-                List<Event> unFinishedEvents = eventEntityService.getEventsByPublished(false);
-                // unFinishedEvents = unFinishedEvents.subList(0, Math.min(unFinishedEvents.size(), 10));//TODO 테스트 종료 후 제거
-                //메시지브로커에게 퍼블리싱
-                for(Event event : unFinishedEvents){
+
+            //미처리 이벤트 가져옴
+            List<Event> unFinishedEvents = eventEntityService.getEventsByPublished(false);
+            // unFinishedEvents = unFinishedEvents.subList(0, Math.min(unFinishedEvents.size(), 10));//TODO 테스트 종료 후 제거
+            //메시지브로커에게 퍼블리싱
+            for(Event event : unFinishedEvents){
+                try {
 
                     JsonNode eventDataNode = objectMapper.readTree(event.getEventData());
                     // JSON 변환
@@ -52,6 +53,7 @@ public class EventPublishService {
                     jsonMap.put("eventId", event.getEventId());
                     jsonMap.put("eventType", event.getEventType());
                     jsonMap.put("value", eventDataNode);
+                    jsonMap.put("parentEventId", event.getParentEventId());
                     JsonNode jsonMessage = objectMapper.valueToTree(jsonMap);
 
                     kafkaProducer.sendMessage(event.getEventType(), jsonMessage.toString());
@@ -60,15 +62,19 @@ public class EventPublishService {
 
                     //경과시간 조사하여 LOCK_TIME(10초) 이상 물고있었으면 멈춤
                     long elapsedTime = System.currentTimeMillis() - startTime;
-                    if(elapsedTime> LOCK_TIME * 1000){
+                    if (elapsedTime > LOCK_TIME * 1000) {
                         break;
                     }
+                }catch (Exception e){
+                    log.error("publishUnFinishedEvents error", e);
+                }finally {
+                    log.info("{} unlock!", Thread.currentThread().getId());
+                    event.addTryCount();
+                    redisLockService.unlock(LOCK_KEY);
                 }
             }
-            finally {
-                log.info("{} unlock!", Thread.currentThread().getId());
-                redisLockService.unlock(LOCK_KEY);
-            }
+
+
         }else{
             log.info("{} couldn't get lock!", Thread.currentThread().getId());
             throw new RuntimeException("Unable to acquire lock, event processing unlocked");
