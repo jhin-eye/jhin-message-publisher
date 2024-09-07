@@ -29,7 +29,7 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
-      group-id: test
+      group-id: message-publisher
 
 lock:
   timeout: 10

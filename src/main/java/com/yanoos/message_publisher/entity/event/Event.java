@@ -30,15 +30,15 @@ public class Event {
     @Column(name = "event_type", nullable = false)
     private String eventType;
     @Column(name="created_at",nullable = false, updatable = false)
-    private Instant createdAt = Instant.now();
+    private Long createdAt = Instant.now().getEpochSecond();
     @Column(name="try_count", nullable = false)
     private Long tryCount;
     @Column(name="published_at", nullable = true)
-    private Instant publishedAt;
+    private Long publishedAt;
 
     public void done() {
         this.published =true;
-        this.publishedAt = Instant.now();
+        this.publishedAt = Instant.now().getEpochSecond();
     }
 
     public void addTryCount(){
