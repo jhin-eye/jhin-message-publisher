@@ -6,6 +6,8 @@ import lombok.*;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "event")
@@ -30,15 +32,15 @@ public class Event {
     @Column(name = "event_type", nullable = false)
     private String eventType;
     @Column(name="created_at",nullable = false, updatable = false)
-    private Long createdAt = Instant.now().getEpochSecond();
+    private ZonedDateTime createdAt = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));;
     @Column(name="try_count", nullable = false)
     private Long tryCount;
     @Column(name="published_at", nullable = true)
-    private Long publishedAt;
+    private ZonedDateTime publishedAt;
 
     public void done() {
         this.published =true;
-        this.publishedAt = Instant.now().getEpochSecond();
+        this.publishedAt = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
     }
 
     public void addTryCount(){
