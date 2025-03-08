@@ -56,9 +56,11 @@ public class EventPublishService {
                     jsonMap.put("parentEventId", event.getParentEventId());
                     JsonNode jsonMessage = objectMapper.valueToTree(jsonMap);
 
-                    kafkaProducer.sendMessage(event.getEventType(), jsonMessage.toString());
+                    boolean success = kafkaProducer.sendMessage(event.getEventType(), jsonMessage.toString());
                     //이벤트 처리 완료
-                    event.done();
+                    if(success) {
+                        event.done();
+                    }
 
                     //경과시간 조사하여 LOCK_TIME(10초) 이상 물고있었으면 멈춤
                     long elapsedTime = System.currentTimeMillis() - startTime;
