@@ -1,0 +1,33 @@
+image:
+  repository: yanoos555/message-publisher
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+replicaCount: 1
+containerPort: 8080
+
+
+nodeSelector:
+  eks.amazonaws.com/nodegroup: jhin-eye-nodes
+# values.yaml
+metrics:
+  enabled: true
+  port: 8081
+
+config:
+  SPRING_PROFILE_ACTIVE: prod
+  POSTGRES_DB_HOST: jhineye-postgres-postgresql.jhin-eye.svc.cluster.local
+  POSTGRES_DB_NAME: jhineye
+  POSTGRES_DB_PORT: "5432"
+  POSTGRES_USER: postgres
+  KAKAO_REDIRECT_URI: http://jhineye.store/api/kakao/callback
+  KAKAO_LOGOUT_REDIRECT_URI: http://jhineye.store/
+  KAFKA_BOOTSTRAP_SERVERS: kafka.jhin-eye.svc.cluster.local
+  KAFKA_BOOTSTRAP_SERVERS_PORT: "9092"
+  REDIS_HOST: redis-master.jhin-eye.svc.cluster.local
+  REDIS_PORT: "6379"
+  CRON_EXPRESSION: "0 * * * * *"
+  SERVER_URL: http://jhineye.store
+
+backend:
+  service:
+    port: 8080

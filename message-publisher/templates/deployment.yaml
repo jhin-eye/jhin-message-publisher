@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jhineye-message-publisher
+  labels:
+    app: jhineye-message-publisher
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: jhineye-message-publisher
+  template:
+    metadata:
+      labels:
+        app: jhineye-message-publisher
+    spec:
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      containers:
+        - name: message-publisher
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+          envFrom:
+            - configMapRef:
+                name: jhineye-message-publisher-config
+            - secretRef:
+                name: jhineye-message-publisher-secret
+          resources:
+            requests:
+              cpu: 200m
+              memory: 125Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
