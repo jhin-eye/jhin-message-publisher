@@ -39,11 +39,10 @@ jobs:
           helm upgrade --install jhineye-message-publisher ./message-publisher \
             --namespace jhin-eye \
             --create-namespace \
-            -f telegram-bot/values.yaml \
+            -f message-publisher/values.yaml \
             --set image.tag=${{ github.event.workflow_run.head_branch }} \
             --set secrets.postgresPassword=${{ secrets.POSTGRES_PASSWORD }} \
             --set secrets.jwtSecretKey=${{ secrets.JWT_SECRET_KEY }} \
             --set secrets.kakaoClientId=${{ secrets.KAKAO_CLIENT_ID }} \
-            --set secrets.telegramToken=${{ secrets.TELEGRAM_TOKEN }} \
             --set secrets.kakaoClientSecret=${{ secrets.KAKAO_CLIENT_SECRET }}
   
