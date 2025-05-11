@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local
+    active: prod
   application:
     name: message_publisher
   data:
@@ -11,7 +11,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/notice_hub
     username: yanoos
-    password: anfrhrl99!
+    password: sdsdsd
   jpa:
     hibernate:
       ddl-auto: none
